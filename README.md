@@ -29,3 +29,4 @@ which affects all FreeBSD versions including the PS4's Orbis OS (FreeBSD 9).
 - ps3120 — BD-JB-1250 and bdj1304.iso
 - Gezine — BD-JB vulnerability discovery
 - Scene-Collective — ps4-hen open source offsets
+- Pharaoh2k — 13.04 kernel offsets verification
