@@ -1,0 +1,17 @@
+// PS4 Kernel Offsets - Firmware 13.52 (PARTIAL)
+// Source: Anonymous dev via Shunsui
+// Status: Incomplete — needs verification and additional offsets
+
+// Known offsets:
+// PRISON0    = 0x111FA18  (same as 13.00-13.04)
+// ROOTVNODE  = 0x2136E90  (same as 13.00-13.04)
+// SYSENT     = 0x110A760  (DIFFERENT from 13.04: 0x1102B70)
+// unknown1   = 0x4D6D0
+// unknown2   = 0xE6C60
+
+// PPPwn format:
+// "13.52": (0x111fa18, 0x2136e90, 0x110a760, 0x4D6D0, 0xE6C60)
+
+// Note: SYSENT changed from 0x1102B70 (13.04) to 0x110A760 (13.52)
+// This indicates kernel code changes between 13.04 and 13.52
+// PRISON0 and ROOTVNODE remain stable across all 13.x firmwares
