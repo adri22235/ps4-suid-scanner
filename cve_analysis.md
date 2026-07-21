@@ -5,7 +5,7 @@
 - **Type:** Local privilege escalation
 - **Component:** exec_args_adjust_args() in sys/kern/kern_exec.c
 - **Bug:** Operator precedence error in memmove size calculation
-- **Status:** DISCARDED — function does not exist in FreeBSD 9, 10, or 11
+- **Status:** DISCARDED — function introduced in FreeBSD 13.0, not present in FreeBSD 9, 10, 11, or 12. PS4 uses FreeBSD 9.
 - **Verified:** Searched FreeBSD 9.0, 10.0, and 11.0 source trees
 - **Conclusion:** Function was introduced in FreeBSD 12+, not present in PS4 kernel
 
