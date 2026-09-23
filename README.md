@@ -1,16 +1,17 @@
-# PS4 Security Research — Firmware 13.04
+# PS4 Security Research — Firmware 13.04 / 14.00
 
-Research tools and kernel offsets for PS4 firmware 13.04 security research.
+Research tools and kernel offsets for PS4 firmware 13.04–14.00 security research.
 
 ## Contents
 
 - `1304.c` / `1304.h` — Complete kernel offsets for FW 13.04
+- `1400.c` / `1400.h` — Complete kernel offsets for FW 14.00
 - `1352_offsets.txt` — Partial kernel offsets for FW 13.52
 - `src/org/bdj/SuidScanner.java` — SUID/SGID binary scanner via BD-JB
 - `scanner_1304.iso` — Pre-built ISO for testing
 - `cve_analysis.md` — CVE analysis for PS4 kernel
 
-## Status (July 21, 2026)
+## Status (September 24, 2026)
 
 ### Entry Points Confirmed on 13.04
 - ✅ **BD-JB** — Sandbox escape working (ps3120/Gezine)
@@ -24,6 +25,10 @@ Research tools and kernel offsets for PS4 firmware 13.04 security research.
 - 🔥 **CVE-2026-49415** — execve TOCTOU race condition, affects all FreeBSD versions. Under investigation.
 
 ### Latest News
+- **2026-09-24**: FW 14.00 kernel offsets added (source: Al-Azif, Scene-Collective/ps4-hen pre-release-main-182)
+- **2026-09-21**: PS4 13.04 jailbroken with GoldHEN v2.4b18.12 (SiSTRo)
+- **2026-09-19**: PS4 13.04 jailbroken with HEN 2.2.0 (webkitty.arabpixel.net)
+- **2026-09-16**: Sony releases FW 14.00 ("stability improvements")
 - **2026-07-21**: MasterMaind confirms BD-J sandbox escape up to 13.50/13.52
 - **2026-07-21**: etaHEN updated for PS5 up to 12.70
 - **2026-07-18**: Celsius (ffs_mount KEX) announced by bollars
@@ -45,6 +50,17 @@ Results displayed on screen and saved to USB at `/mnt/usb0/suid_scan.txt`.
 
 ### 13.04 (Complete)
 Full offsets in `1304.c` — based on 13.02 (identical kernel) verified by Pharaoh2k's offset table.
+
+### 14.00 (Complete)
+Full offsets in `1400.c` — from Al-Azif's Scene-Collective commit (Sep 19, 2026).
+
+Key data addresses (unchanged from 13.04):
+```
+PRISON0    = 0x111FA18
+ROOTVNODE  = 0x2136E90
+SYSENT     = 0x1102B70
+ALLPROC    = 0x1B28538
+```
 
 ### 13.52 (Partial)
 ```
@@ -102,7 +118,9 @@ Credit: Shunsui (discovery and analysis)
 - ps3120 — BD-JB-1250 and bdj1304.iso
 - Gezine — BD-JB vulnerability discovery
 - Scene-Collective — ps4-hen open source offsets
+- Al-Azif — 14.00 kernel offsets (Scene-Collective/ps4-hen)
 - Pharaoh2k — 13.04 kernel offsets verification
+- SiSTRo — GoldHEN v2.4b18.12
 - bollars — Celsius (ffs_mount) discovery
 - MasterMaind (@ASaudidos) — BD-J escape confirmation up to 13.52
 - Shunsui — MP4 parser vulnerability discovery and analysis
