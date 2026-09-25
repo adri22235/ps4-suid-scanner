@@ -1,1 +1,60 @@
-404: Not Found
+// PS4 Kernel Offsets - Firmware 14.00 (COMPLETE)
+// Source: Al-Azif, Scene-Collective/ps4-hen pre-release-main-182
+// Commit: d077fb4, September 19, 2026
+// Sony released FW 14.00 on September 16, 2026
+
+// Data addresses (all unchanged from 13.04):
+// XFAST_SYSCALL  = 0x000001C0
+// PRISON0        = 0x0111FA18
+// ROOTVNODE      = 0x02136E90
+// M_TEMP         = 0x01520D00
+// ALLPROC        = 0x01B28538
+// SYSENT         = 0x01102B70
+// FPU_CTX        = 0x026542C0
+
+// PPPwn/WebKit exploit format:
+// "14.00": (0x111fa18, 0x2136e90, 0x1102b70, 0x47B31, 0xe6c60)
+
+// Function addresses (changed from 13.04):
+// memcmp         = 0x00394D80  (was 0x00394310)
+// strstr         = 0x0021D010  (was 0x0021CCC0)
+// memcpy         = 0x002BD850  (was 0x002BD4F0)
+// memset         = 0x001FA500  (was 0x001FA1B0)
+// strlen         = 0x0036B5A0  (was 0x0036ABA0)
+// printf         = 0x002E07C0  (was 0x002E0450)
+// fpu_kern_enter = 0x001E03A0  (was 0x001E0050)
+// fpu_kern_leave = 0x001E0460  (was 0x001E0110)
+// proc_rwmem     = 0x00366A10  (was 0x00366010)
+
+// Function addresses (unchanged from 13.04):
+// malloc         = 0x00009520
+// free           = 0x000096E0
+// _sx_xlock      = 0x000A3840
+// _sx_xunlock    = 0x000A3A00
+
+// Installer offsets (from offsets.h):
+// PMAP_PROTECT     = 0x00059DF0  (unchanged)
+// PMAP_PROTECT_P   = 0x00059E37  (unchanged)
+// PMAP_STORE       = 0x01B2C3A0  (unchanged)
+// UART_PATCH       = 0x01A47F90  (was 0x01A47F40)
+// COPYIN_PATCH_1   = 0x002BDA97  (was 0x002BD737)
+// COPYIN_PATCH_2   = 0x002BDAA3  (was 0x002BD743)
+// COPYOUT_PATCH_1  = 0x002BD9A2  (was 0x002BD642)
+// COPYOUT_PATCH_2  = 0x002BD9AE  (was 0x002BD64E)
+// COPYINSTR_1      = 0x002BDF43  (was 0x002BDBF3 in 13.50)
+// COPYINSTR_2      = 0x002BDF4F  (was 0x002BDBFF in 13.50)
+// COPYINSTR_3      = 0x002BDF80  (was 0x002BDC30 in 13.50)
+// SETLOGIN_PATCH   = 0x00394C7C  (was 0x003945CC in 13.50)
+// PFS_SIG_CHECK    = 0x0069E600  (was 0x0069DF40 in 13.50)
+// DEBUG_RIF_1      = 0x0064F720  (was 0x0064F060 in 13.50)
+// DEBUG_RIF_2      = 0x0064F750  (was 0x0064F090 in 13.50)
+// DEPTH_LIMIT      = 0x00030F66  (unchanged)
+
+// Analysis:
+// - Data segment addresses (PRISON0, ROOTVNODE, SYSENT, ALLPROC) are IDENTICAL
+//   to 13.04, meaning Sony did not restructure kernel data layout.
+// - Function addresses shifted by small deltas (0x360-0xA70 range),
+//   indicating minor code additions/changes but no major recompilation.
+// - "Stability improvements" = patched some code paths, didn't touch structures.
+
+// Full C struct: see ps4-suid-scanner/1400.c
