@@ -6,3 +6,4 @@
 extern const struct kpayload_offsets offsets_1304;
 
 #endif
+
