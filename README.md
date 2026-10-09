@@ -1,130 +1,57 @@
 # PS4 Security Research — Firmware 13.04 / 14.00
 
-Research tools and kernel offsets for PS4 firmware 13.04–14.00 security research.
+Public research notes, firmware-specific data, and a BD-J SUID/SGID scanner. Treat offsets and vulnerability claims as **research leads**, not verified facts, unless a primary source and reproducible test are linked.
 
 ## Contents
 
-- `1304.c` / `1304.h` — Complete kernel offsets for FW 13.04
-- `1400.c` / `1400.h` — Complete kernel offsets for FW 14.00
-- `1352_offsets.txt` — Partial kernel offsets for FW 13.52
-- `src/org/bdj/SuidScanner.java` — SUID/SGID binary scanner via BD-JB
-- `scanner_1304.iso` — Pre-built ISO for testing
-- `cve_analysis.md` — CVE analysis for PS4 kernel
+- 1304.c / 1304.h — Project-provided offset table for FW 13.04
+- 1400.c / 1400.h and 1400_offsets.txt — Project-provided data for FW 14.00
+- 1352_offsets.txt — Partial project-provided data for FW 13.52
+- src/org/bdj/SuidScanner.java — SUID/SGID scanner via the BD-J API
+- scanner_1304.iso — Pre-built image; verify its provenance and hash before use
+- cve_analysis.md — Evidence status and limitations for vulnerability research
 
-## Status (September 24, 2026)
+## Build and verification status
 
-### Entry Points Confirmed on 13.04
-- ✅ **BD-JB** — Sandbox escape working (ps3120/Gezine)
-- ✅ **WebKit DOM postMessage** — Vulnerability present (confirmed on hardware)
-- ✅ **WebKit DOM getters** — Vulnerability present (confirmed on hardware)
-- ✅ **WebKit LLInt OOB** — Vulnerability present (confirmed on hardware)
-- ✅ **PlayStation Vue** — Installed, potential Celsius entry point
+This checkout is **not currently a reproducible build**. The BD-J scanner source depends on `org.bdj.api.API` and `org.bdj.Status`, which are not included here, and no build script or test suite is present. The C offset fragments also reference headers that are absent at their include paths. The prebuilt ISO and `hen.bin` have not been reproduced from the text sources in this repository; verify their provenance and SHA-256 before trusting them.
 
-### Kernel Exploits
-- 🔥 **Celsius (ffs_mount)** — Integer overflow in ffs_mountfs(), works up to 13.04, patched in 13.50. Discovered by bollars.
-- 🔥 **CVE-2026-49415** — execve TOCTOU race condition, affects all FreeBSD versions. Under investigation.
+See [AUDIT_STATUS.md](AUDIT_STATUS.md) for the file-by-file audit and remaining blockers.
 
-### Latest News
-- **2026-09-24**: FW 14.00 kernel offsets added (source: Al-Azif, Scene-Collective/ps4-hen pre-release-main-182)
-- **2026-09-21**: PS4 13.04 jailbroken with GoldHEN v2.4b18.12 (SiSTRo)
-- **2026-09-19**: PS4 13.04 jailbroken with HEN 2.2.0 (webkitty.arabpixel.net)
-- **2026-09-16**: Sony releases FW 14.00 ("stability improvements")
-- **2026-07-21**: MasterMaind confirms BD-J sandbox escape up to 13.50/13.52
-- **2026-07-21**: etaHEN updated for PS5 up to 12.70
-- **2026-07-18**: Celsius (ffs_mount KEX) announced by bollars
-- **2026-07-18**: 13.04 kernel offsets published
+## Evidence status
+
+A vulnerability in upstream FreeBSD does **not** by itself establish that the same code or bug exists in Sony's modified Orbis kernel. Firmware-specific conclusions require comparison against the relevant Sony kernel build or reproducible tests on an authorized test device.
+
+- **CVE-2026-7270 (execve)**: FreeBSD published an advisory for affected supported FreeBSD releases. That advisory does not establish impact on Orbis/FreeBSD 9; see [FreeBSD-SA-26:13.exec](https://www.mail-archive.com/announce%40freebsd.org/msg00235.html).
+- **CVE-2026-49415 (execve TOCTOU)**: FreeBSD published an advisory for specific supported release branches. Do not describe it as affecting every FreeBSD version or PS4 without evidence; see [FreeBSD-SA-26:39.execve](https://lists.freebsd.org/archives/freebsd-security/2026-June/000522.html).
+- **UFS/FFS size arithmetic**: an upstream FreeBSD fix is available at [freebsd-src commit 442f060](https://github.com/freebsd/freebsd-src/commit/442f0608ec7e4b8ccb13f3101f294acbf0fce446). Whether the vulnerable code exists in a particular Orbis firmware must be checked independently.
+- **MP4 parser report**: crashes reported in this project are not proof of a remotely exploitable memory corruption bug or of impact on other firmware versions. Keep affected versions marked unknown until supported by reproducible evidence.
 
 ## SUID Scanner
 
-Scans the PS4 filesystem for SUID/SGID binaries via BD-JB userland exploit.
-Uses native FreeBSD syscalls (open, getdents, stat) via BD-JB's Java API.
-Results displayed on screen and saved to USB at `/mnt/usb0/suid_scan.txt`.
+The scanner attempts to enumerate filesystem entries and report files whose mode includes SUID or SGID bits. It uses native functions exposed by the BD-J API and can write a text report to a mounted USB device.
 
 ### Usage
-1. Burn `scanner_1304.iso` to BD-R at 4x speed
-2. Insert USB drive (FAT32/exFAT) in PS4
-3. Insert BD-R disc
-4. Results appear on screen and saved to USB
 
-## Kernel Offsets
+1. Verify the image's origin and integrity before using it.
+2. Use only on a console and media you own or are authorized to test.
+3. Insert a writable USB device and the test BD-R.
+4. Review the on-screen output and, if available, /mnt/usb0/suid_scan.txt.
 
-### 13.04 (Complete)
-Full offsets in `1304.c` — based on 13.02 (identical kernel) verified by Pharaoh2k's offset table.
+**Limitations:** directory visibility depends on the BD-J environment and permissions. The scanner's stat field offsets are ABI-specific and must be verified against the exact target firmware; results are not a complete inventory unless coverage is demonstrated. A failed scan or empty result does not prove that no SUID/SGID files exist.
 
-### 14.00 (Complete)
-Full offsets in `1400.c` — from Al-Azif's Scene-Collective commit (Sep 19, 2026).
+## Firmware offset tables
 
-Key data addresses (unchanged from 13.04):
-```
-PRISON0    = 0x111FA18
-ROOTVNODE  = 0x2136E90
-SYSENT     = 0x1102B70
-ALLPROC    = 0x1B28538
-```
+The offset files in this repository are research data, not an authoritative compatibility guarantee. Verify every value against a public source or the exact firmware image before using it. Do not infer that an offset remains valid across firmware versions simply because some addresses appear unchanged. The values described as complete in earlier notes have not been independently revalidated by this change.
 
-### 13.52 (Partial)
-```
-PRISON0    = 0x111FA18
-ROOTVNODE  = 0x2136E90
-SYSENT     = 0x110A760
-unknown1   = 0x4D6D0
-unknown2   = 0xE6C60
-```
+## References
 
-## CVE Analysis
-
-See `cve_analysis.md` for detailed analysis of:
-- **CVE-2026-7270** — execve buffer overflow (DISCARDED: function not present in FreeBSD 9)
-- **CVE-2026-49415** — execve TOCTOU race (CANDIDATE: SUID code confirmed in FreeBSD 9)
-- **Celsius / ffs_mount** — Integer overflow in ffs_mountfs() (CONFIRMED for 13.04)
-
-## Celsius (ffs_mount) Technical Analysis
-
-The vulnerability is in `ffs_mountfs()` in `sys/ufs/ffs/ffs_vfsops.c`:
-
-```c
-size = fs->fs_cssize;                          // attacker controlled
-if (fs->fs_contigsumsize > 0)
-    size += fs->fs_ncg * sizeof(int32_t);      // INTEGER OVERFLOW
-size += fs->fs_ncg * sizeof(u_int8_t);         // INTEGER OVERFLOW
-space = malloc((u_long)size, M_UFSMNT, M_WAITOK);  // small malloc
-
-// Later:
-for (i = 0; i < fs->fs_ncg; i++)               // huge loop
-    *lp++ = fs->fs_contigsumsize;               // HEAP OVERFLOW
-```
-
-`fs->fs_ncg` comes from the UFS superblock (attacker controlled). A large value causes integer overflow in the size calculation, resulting in a small malloc but massive heap overflow.
-
-**Requirements:** BD-J or Vue entry point + 250GB+ HDD with malformed UFS image.
-
-## MP4 Parser Vulnerability (Under Investigation)
-
-A malformed MP4 file (`mutado_race.mp4`) crashes Media Player and SHAREfactory:
-- Crash confirmed on FW 11.00 (likely present on 13.04)
-- Bug in `moov.udta.meta` atom parsing
-- Child atom declares 190 bytes in 90-byte container → heap overflow
-- Injection points at offsets 0x833 and 0x885
-- Error 34878-0 on SHAREfactory, freeze on Media Player
-
-Credit: Shunsui (discovery and analysis)
-
-## Based on
-- [BD-JB-1250](https://github.com/ps3120/BD-JB-1250) by ps3120/Gezine
-- [Scene-Collective/ps4-hen](https://github.com/Scene-Collective/ps4-hen) for offset format
-- [PPPwn](https://github.com/TheOfficialFloW/PPPwn) by TheFloW for exploit architecture reference
-
-## Credits
-- ps3120 — BD-JB-1250 and bdj1304.iso
-- Gezine — BD-JB vulnerability discovery
-- Scene-Collective — ps4-hen open source offsets
-- Al-Azif — 14.00 kernel offsets (Scene-Collective/ps4-hen)
-- Pharaoh2k — 13.04 kernel offsets verification
-- SiSTRo — GoldHEN v2.4b18.12
-- bollars — Celsius (ffs_mount) discovery
-- MasterMaind (@ASaudidos) — BD-J escape confirmation up to 13.52
-- Shunsui — MP4 parser vulnerability discovery and analysis
-- Victor — Celsius confirmation and technical guidance
+- [BD-JB-1250](https://github.com/ps3120/BD-JB-1250)
+- [Scene-Collective/ps4-hen](https://github.com/Scene-Collective/ps4-hen)
+- [PPPwn](https://github.com/TheOfficialFloW/PPPwn)
+- [FreeBSD-SA-26:13.exec](https://www.mail-archive.com/announce%40freebsd.org/msg00235.html)
+- [FreeBSD-SA-26:39.execve](https://lists.freebsd.org/archives/freebsd-security/2026-June/000522.html)
+- [FreeBSD UFS/FFS fix, commit 442f060](https://github.com/freebsd/freebsd-src/commit/442f0608ec7e4b8ccb13f3101f294acbf0fce446)
 
 ## License
-This research is for educational and security research purposes only.
+
+See the repository's license file, if present. This project is intended for educational and authorized security research.

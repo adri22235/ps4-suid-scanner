@@ -14,4 +14,4 @@
 
 // Note: SYSENT changed from 0x1102B70 (13.04) to 0x110A760 (13.52)
 // This indicates kernel code changes between 13.04 and 13.52
-// PRISON0 and ROOTVNODE remain stable across all 13.x firmwares
+// Do not generalize these two values to all 13.x firmwares without independent verification.
