@@ -1,5 +1,6 @@
 // ============================================================
-// Jordy Stage 2 - Persistent R/W + Code Execution for PS4 13.04
+// Jordy Stage 2 - INCOMPLETE RESEARCH SCAFFOLD for PS4 13.04
+// NOT A WORKING OR VERIFIED EXPLOIT. Do not treat the TODO placeholders as functional.
 // 
 // INSTRUCTIONS:
 // 1. Replace the "// Restore the carrier" block in Jordy (lines 500-507)
@@ -61,7 +62,7 @@ function stage2_init(candidate, rwView, rwHeader, scratchBytes, scratchWords) {
     
     log("[S2] Stage 2 initialized - persistent r/w active");
     
-    // Start the exploitation chain
+    // This prototype calls placeholder code; no working chain is implemented.
     try {
         stage2_run();
     } catch(e) {
