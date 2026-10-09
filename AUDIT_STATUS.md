@@ -28,6 +28,7 @@ This file tracks the public, static audit of this repository. It is not a claim 
 3. The C offset fragments reference headers that are absent at the referenced paths. They cannot be treated as a standalone buildable C target in this tree.
 4. The ISO and binary payload have no in-repository SHA-256/provenance manifest, so their relationship to the text sources cannot currently be established.
 5. Firmware-specific offsets and `stat` layout must remain unverified until backed by an exact public source or a reproducible test on an authorized device.
+6. No `LICENSE` file is present in the audited tree. Clarify project ownership and third-party license obligations before redistribution.
 
 ## Validation record
 
