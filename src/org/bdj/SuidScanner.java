@@ -18,6 +18,7 @@ public class SuidScanner {
 
     private API api;
     private long openAddr, closeAddr, getdentsAddr, statAddr, writeAddr;
+    private boolean usesGetdirentries;
     private final StringBuffer results;
     private int suidCount;
 
@@ -33,11 +34,17 @@ public class SuidScanner {
             openAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "open");
             closeAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "close");
             getdentsAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "getdents");
+            if (getdentsAddr == 0) {
+                // FreeBSD commonly exposes getdirentries(2), not the Linux getdents(2) API.
+                getdentsAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "getdirentries");
+                usesGetdirentries = getdentsAddr != 0;
+            }
             statAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "stat");
             writeAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "write");
             Status.println("open=" + Long.toHexString(openAddr) +
                 " stat=" + Long.toHexString(statAddr) +
-                " getdents=" + Long.toHexString(getdentsAddr));
+                " directory-reader=" + (usesGetdirentries ? "getdirentries" : "getdents") +
+                "@" + Long.toHexString(getdentsAddr));
         } catch (Exception e) {
             Status.printStackTrace("SuidScanner init: ", e);
             api = null;
@@ -99,8 +106,22 @@ public class SuidScanner {
             return;
         }
 
+        long basep = 0;
+        if (usesGetdirentries) {
+            // getdirentries expects a writable 64-bit off_t * basep on amd64.
+            basep = api.calloc(1, 8);
+            if (basep == 0) {
+                api.free(dentsBuf);
+                api.call(closeAddr, fd);
+                Status.println("[WARN] Unable to allocate directory offset buffer");
+                return;
+            }
+        }
+
         while (true) {
-            long nread = api.call(getdentsAddr, fd, dentsBuf, DENTS_BUF_SIZE);
+            long nread = usesGetdirentries
+                ? api.call(getdentsAddr, fd, dentsBuf, DENTS_BUF_SIZE, basep)
+                : api.call(getdentsAddr, fd, dentsBuf, DENTS_BUF_SIZE);
             if (nread <= 0) break;
             if (nread > DENTS_BUF_SIZE) {
                 Status.println("[WARN] Invalid getdents length; stopping directory: " + path);
@@ -148,6 +169,7 @@ public class SuidScanner {
         }
 
         api.call(closeAddr, fd);
+        if (basep != 0) api.free(basep);
         api.free(dentsBuf);
     }
 
