@@ -132,7 +132,7 @@ public class SuidScanner {
                 String name = api.readString(dentsBuf + pos + DIRENT_HEADER_SIZE, namlen);
                 if (name != null && name.length() == namlen &&
                     !name.equals(".") && !name.equals("..") &&
-                    name.indexOf('/') < 0 && name.indexOf('\u0000') < 0) {
+                    name.indexOf('/') < 0 && name.indexOf(0) < 0) {
                     String full = path.equals("/") ? "/" + name : path + "/" + name;
                     if (isPathValid(full)) {
                         checkSuid(full);
