@@ -8,7 +8,7 @@ This file tracks the public, static audit of this repository. It is not a claim 
 |---|---|---|
 | `README.md` | Scope and evidence claims clarified | Add reproducible build/use instructions once the actual build inputs are identified |
 | `cve_analysis.md` | Upstream FreeBSD claims separated from Orbis claims | No PS4-specific CVE is confirmed by the evidence currently stored here |
-| `src/org/bdj/SuidScanner.java` | Directory record bounds checks, `getdirentries` fallback, UTF-8 path/report byte handling | Build against the exact BD-J API version; validate `stat` layout and native symbols on each target firmware; test on authorized hardware |
+| `src/org/bdj/SuidScanner.java` | Directory record bounds checks; `getdirentries` fallback; UTF-8 byte-safe paths/reports; prefers `lstat`; logs read errors; writes a report even when zero hits are found | Build against the exact BD-J API version; validate `stat` layout and native symbols on each target firmware; test on authorized hardware |
 | `1304.c` | Offset table only; not independently validated by this audit | Includes `sections.h` and `offsets/1304.h`, which are not present at those paths in this repository |
 | `1304.h` | Header fragment | Includes `../offsets.h`, which is absent from the repository tree |
 | `1400.c` | Offset table only; not independently validated by this audit | Includes `sections.h` and `offsets/1400.h`, which are not present at those paths in this repository |
