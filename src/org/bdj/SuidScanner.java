@@ -19,6 +19,7 @@ public class SuidScanner {
     private API api;
     private long openAddr, closeAddr, getdentsAddr, statAddr, writeAddr;
     private boolean usesGetdirentries;
+    private boolean usesStatFallback;
     private final StringBuffer results;
     private int suidCount;
 
@@ -39,12 +40,20 @@ public class SuidScanner {
                 getdentsAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "getdirentries");
                 usesGetdirentries = getdentsAddr != 0;
             }
-            statAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "stat");
+            statAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "lstat");
+            if (statAddr == 0) {
+                statAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "stat");
+                usesStatFallback = statAddr != 0;
+            }
             writeAddr = api.dlsym(API.LIBC_MODULE_HANDLE, "write");
             Status.println("open=" + Long.toHexString(openAddr) +
-                " stat=" + Long.toHexString(statAddr) +
+                " metadata-reader=" + (usesStatFallback ? "stat" : "lstat") +
+                "@" + Long.toHexString(statAddr) +
                 " directory-reader=" + (usesGetdirentries ? "getdirentries" : "getdents") +
                 "@" + Long.toHexString(getdentsAddr));
+            if (usesStatFallback) {
+                Status.println("[WARN] lstat unavailable; symlink metadata may refer to its target");
+            }
         } catch (Exception e) {
             Status.printStackTrace("SuidScanner init: ", e);
             api = null;
