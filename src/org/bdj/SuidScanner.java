@@ -204,7 +204,7 @@ public class SuidScanner {
                 int namlen = api.read8(dentsBuf + pos + 7) & 0xFF;
 
                 if (reclen < DIRENT_HEADER_SIZE || reclen > remaining ||
-                    namlen > reclen - DIRENT_HEADER_SIZE) {
+                    namlen >= reclen - DIRENT_HEADER_SIZE) {
                     Status.println("[WARN] Malformed directory entry; stopping directory: " + path);
                     malformed = true;
                     break;
