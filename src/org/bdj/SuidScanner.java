@@ -170,7 +170,11 @@ public class SuidScanner {
             long nread = usesGetdirentries
                 ? api.call(getdentsAddr, fd, dentsBuf, DENTS_BUF_SIZE, basep)
                 : api.call(getdentsAddr, fd, dentsBuf, DENTS_BUF_SIZE);
-            if (nread <= 0) break;
+            if (nread < 0) {
+                Status.println("[WARN] Directory read failed: " + path);
+                break;
+            }
+            if (nread == 0) break;
             if (nread > DENTS_BUF_SIZE) {
                 Status.println("[WARN] Invalid getdents length; stopping directory: " + path);
                 break;
@@ -261,11 +265,8 @@ public class SuidScanner {
     }
 
     private void saveToUsb() {
-        if (results.length() == 0 || api == null || openAddr == 0 ||
-            closeAddr == 0 || writeAddr == 0) {
-            if (results.length() > 0) {
-                Status.println("USB save unavailable: required native API functions are missing");
-            }
+        if (api == null || openAddr == 0 || closeAddr == 0 || writeAddr == 0) {
+            Status.println("USB save unavailable: required native API functions are missing");
             return;
         }
 
