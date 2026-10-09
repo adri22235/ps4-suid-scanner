@@ -28,6 +28,6 @@ const webkit_gadgets_1304 = {
 // 27.79% bytes different (216,403 regions)
 // Most changes are small 1-2 byte patches
 
-// CONFIRMED: Celsius (ffs_mount) is present in 13.04 kernel
-// The vulnerable function exists at the same offset as 13.00
+// UNVERIFIED RESEARCH CLAIM: the comments above report matching offsets in two dumps.
+// This alone does not prove the exact vulnerable code path or exploitability on Orbis 13.04.
 
