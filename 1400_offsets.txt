@@ -1,9 +1,9 @@
-// PS4 Kernel Offsets - Firmware 14.00 (COMPLETE)
+// PS4 Kernel Offsets - Firmware 14.00 (UNVERIFIED RESEARCH NOTES)
 // Source: Al-Azif, Scene-Collective/ps4-hen pre-release-main-182
 // Commit: d077fb4, September 19, 2026
 // Sony released FW 14.00 on September 16, 2026
 
-// Data addresses (all unchanged from 13.04):
+// Reported data addresses (claimed unchanged from 13.04; not independently verified here):
 // XFAST_SYSCALL  = 0x000001C0
 // PRISON0        = 0x0111FA18
 // ROOTVNODE      = 0x02136E90
@@ -15,7 +15,7 @@
 // PPPwn/WebKit exploit format:
 // "14.00": (0x111fa18, 0x2136e90, 0x1102b70, 0x47B31, 0xe6c60)
 
-// Function addresses (changed from 13.04):
+// Reported function addresses (claimed changed from 13.04; verify against exact firmware):
 // memcmp         = 0x00394D80  (was 0x00394310)
 // strstr         = 0x0021D010  (was 0x0021CCC0)
 // memcpy         = 0x002BD850  (was 0x002BD4F0)
@@ -26,7 +26,7 @@
 // fpu_kern_leave = 0x001E0460  (was 0x001E0110)
 // proc_rwmem     = 0x00366A10  (was 0x00366010)
 
-// Function addresses (unchanged from 13.04):
+// Reported function addresses (claimed unchanged from 13.04; verify against exact firmware):
 // malloc         = 0x00009520
 // free           = 0x000096E0
 // _sx_xlock      = 0x000A3840
@@ -51,10 +51,8 @@
 // DEPTH_LIMIT      = 0x00030F66  (unchanged)
 
 // Analysis:
-// - Data segment addresses (PRISON0, ROOTVNODE, SYSENT, ALLPROC) are IDENTICAL
-//   to 13.04, meaning Sony did not restructure kernel data layout.
-// - Function addresses shifted by small deltas (0x360-0xA70 range),
-//   indicating minor code additions/changes but no major recompilation.
-// - "Stability improvements" = patched some code paths, didn't touch structures.
+// - These conclusions are hypotheses based on the listed values, not proof of the exact Orbis build.
+// - Similar offsets do not prove identical kernel layout or establish vulnerability status.
+// - Verify each value against a legally obtained FW 14.00 image or an authoritative public source.
 
 // Full C struct: see ps4-suid-scanner/1400.c
