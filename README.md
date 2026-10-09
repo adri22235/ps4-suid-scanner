@@ -11,6 +11,12 @@ Public research notes, firmware-specific data, and a BD-J SUID/SGID scanner. Tre
 - scanner_1304.iso — Pre-built image; verify its provenance and hash before use
 - cve_analysis.md — Evidence status and limitations for vulnerability research
 
+## Build and verification status
+
+This checkout is **not currently a reproducible build**. The BD-J scanner source depends on `org.bdj.api.API` and `org.bdj.Status`, which are not included here, and no build script or test suite is present. The C offset fragments also reference headers that are absent at their include paths. The prebuilt ISO and `hen.bin` have not been reproduced from the text sources in this repository; verify their provenance and SHA-256 before trusting them.
+
+See [AUDIT_STATUS.md](AUDIT_STATUS.md) for the file-by-file audit and remaining blockers.
+
 ## Evidence status
 
 A vulnerability in upstream FreeBSD does **not** by itself establish that the same code or bug exists in Sony's modified Orbis kernel. Firmware-specific conclusions require comparison against the relevant Sony kernel build or reproducible tests on an authorized test device.
