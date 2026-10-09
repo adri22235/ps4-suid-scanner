@@ -76,8 +76,52 @@ public class SuidScanner {
             getdentsAddr != 0 && statAddr != 0;
     }
 
+    private int utf8Length(String value) {
+        if (value == null) return -1;
+        try {
+            return value.getBytes("UTF-8").length;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
     private boolean isPathValid(String path) {
-        return path != null && path.length() < PATH_MAX;
+        int length = utf8Length(path);
+        return length >= 0 && length < PATH_MAX;
+    }
+
+    private boolean copyUtf8String(long dest, String value, int capacity) {
+        if (dest == 0 || value == null) return false;
+        try {
+            byte[] bytes = value.getBytes("UTF-8");
+            if (bytes.length >= capacity) return false;
+            for (int i = 0; i < bytes.length; i++) {
+                api.write8(dest + i, bytes[i]);
+            }
+            api.write8(dest + bytes.length, (byte) 0);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String readDirName(long address, int byteLength) {
+        if (byteLength < 0 || byteLength > 255) return null;
+        byte[] bytes = new byte[byteLength];
+        for (int i = 0; i < byteLength; i++) {
+            bytes[i] = api.read8(address + i);
+        }
+        try {
+            String name = new String(bytes, "UTF-8");
+            byte[] encoded = name.getBytes("UTF-8");
+            if (encoded.length != bytes.length) return null;
+            for (int i = 0; i < bytes.length; i++) {
+                if (encoded[i] != bytes[i]) return null;
+            }
+            return name;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void scanDir(String path, int depth) {
@@ -93,7 +137,11 @@ public class SuidScanner {
             Status.println("[WARN] Unable to allocate path buffer");
             return;
         }
-        api.strcpy(pathBuf, path);
+        if (!copyUtf8String(pathBuf, path, PATH_MAX)) {
+            api.free(pathBuf);
+            Status.println("[WARN] Unable to encode directory path");
+            return;
+        }
         long fd = api.call(openAddr, pathBuf, O_RDONLY);
         api.free(pathBuf);
         if (fd < 0) return;
@@ -149,8 +197,8 @@ public class SuidScanner {
                     break;
                 }
 
-                String name = api.readString(dentsBuf + pos + DIRENT_HEADER_SIZE, namlen);
-                if (name != null && name.length() == namlen &&
+                String name = readDirName(dentsBuf + pos + DIRENT_HEADER_SIZE, namlen);
+                if (name != null && name.length() > 0 &&
                     !name.equals(".") && !name.equals("..") &&
                     name.indexOf('/') < 0 && name.indexOf(0) < 0) {
                     String full = path.equals("/") ? "/" + name : path + "/" + name;
@@ -178,7 +226,11 @@ public class SuidScanner {
 
         long pathBuf = api.malloc(PATH_MAX);
         if (pathBuf == 0) return;
-        api.strcpy(pathBuf, filePath);
+        if (!copyUtf8String(pathBuf, filePath, PATH_MAX)) {
+            api.free(pathBuf);
+            Status.println("[WARN] Unable to encode file path");
+            return;
+        }
         long statBuf = api.calloc(1, STAT_BUF_SIZE);
         if (statBuf == 0) {
             api.free(pathBuf);
@@ -219,7 +271,14 @@ public class SuidScanner {
 
         String[] usbs = {"/mnt/usb0/suid_scan.txt", "/mnt/usb1/suid_scan.txt"};
         String data = "PS4 13.04 SUID Scan\nFound: " + suidCount + "\n\n" + results.toString();
-        if (data.length() >= PATH_MAX * 1024) {
+        byte[] reportBytes;
+        try {
+            reportBytes = data.getBytes("UTF-8");
+        } catch (Exception e) {
+            Status.println("USB save failed: unable to encode report");
+            return;
+        }
+        if (reportBytes.length >= PATH_MAX * 1024) {
             Status.println("USB save skipped: report is too large");
             return;
         }
@@ -228,21 +287,27 @@ public class SuidScanner {
             if (!isPathValid(usbs[i])) continue;
             long p = api.malloc(PATH_MAX);
             if (p == 0) continue;
-            api.strcpy(p, usbs[i]);
+            if (!copyUtf8String(p, usbs[i], PATH_MAX)) {
+                api.free(p);
+                continue;
+            }
             long fd = api.call(openAddr, p, O_WRONLY | O_CREAT | O_TRUNC, 0x1A4);
             api.free(p);
             if (fd < 0) continue;
 
-            long buf = api.malloc(data.length() + 1);
+            long buf = api.malloc(reportBytes.length + 1);
             if (buf == 0) {
                 api.call(closeAddr, fd);
                 Status.println("USB save failed: unable to allocate report buffer");
                 return;
             }
-            api.strcpy(buf, data);
+            for (int j = 0; j < reportBytes.length; j++) {
+                api.write8(buf + j, reportBytes[j]);
+            }
+            api.write8(buf + reportBytes.length, (byte) 0);
 
             long written = 0;
-            long total = data.length();
+            long total = reportBytes.length;
             while (written < total) {
                 long count = api.call(writeAddr, fd, buf + written, total - written);
                 if (count <= 0) break;
