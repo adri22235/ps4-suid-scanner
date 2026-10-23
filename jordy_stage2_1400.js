@@ -46,9 +46,11 @@ var G = {
     POP_R13_R14_R15_RET: 0x06047b, // pop r13; pop r14; pop r15; ret
     POP_R14_RET:     0x0a9e91,
     POP_R15_RET:     0x06047f,
-    // JMP_RSI needs to be found in 14.00 dump
-    // In 13.04 it was 0x0cda83 — search for: ff e6 (jmp rsi)
-    JMP_RSI:         0x0cda83,   // TODO: verify in 14.00 dump
+    // JMP_RSI verified in 14.00 decrypted binary (match ff e6 at 0x0cda83)
+    JMP_RSI:         0x0cda83,   // VERIFIED on FW 14.00
+    XCHG_RAX_RSP_RET: 0x03f755a8, // VERIFIED alternative stack pivot
+    MOV_QWORD_RDI_RAX_RET: 0x0000948b, // VERIFIED write primitive
+    MOV_RAX_QWORD_RAX_RET: 0x00014021, // VERIFIED read primitive
 };
 
 // ============================================================
