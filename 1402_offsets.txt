@@ -1,0 +1,40 @@
+// PS4 Kernel Offsets - Firmware 14.02 (DIFFERENTIAL BASELINE & AUDIT)
+// Status: PENDING VERIFICATION against clean 14.02 flash dump
+// García Casado Security Research | Lead Researcher: Adrián García Casado (@adri22235)
+// Standard: ISO/IEC 29147 CVD / Upstream Scene-Collective ps4-hen
+// Sony released FW 14.02 on November 4, 2026 ("security fixes to system software")
+
+// Critical Data Addresses (Baseline 14.00 matching):
+XFAST_SYSCALL = 0x000001C0
+PRISON0       = 0x0111FA18 // Root jail credential pointer (tentative match 13.00-14.00)
+ROOTVNODE     = 0x02136E90 // Root directory vnode pointer
+SYSENT        = 0x01102B70 // System call table dispatch base
+M_TEMP        = 0x01520D00
+ALLPROC       = 0x01B28538 // Head of process list
+FPU_CTX       = 0x026542C0
+
+// Function addresses (Baseline from FW 14.00):
+memcmp        = 0x00394D80
+_sx_xlock     = 0x000A3840
+_sx_xunlock   = 0x000A3A00
+malloc        = 0x00009520
+free          = 0x000096E0
+strstr        = 0x0021D010
+fpu_kern_enter= 0x001E03A0
+fpu_kern_leave= 0x001E0460
+memcpy        = 0x002BD850
+memset        = 0x001FA500
+strlen        = 0x0036B5A0
+printf        = 0x002E07C0
+eventhandler_register = 0x002244C0
+
+// Subsystems Security Status:
+// - libSceNKWebKit.sprx: Patched CSSFontFace UAF trigger.
+// - APM Subsystem: Patched race condition (Afterglow mitigated in 14.02).
+// - SUID Execution: CVE-2026-49415 candidate (kern_exec.c FreeBSD 9 core unpatched).
+// - Sound Buffer: CVE-2026-101308 candidate (sound buffer mmap UAF).
+// - Semaphores: CVE-2026-58087 candidate (semctl 15-bit wrap).
+
+// Analysis & Recommendation:
+// - Do NOT update retail consoles to 14.02; stay on 14.00 or lower.
+// - Verified ROP gadgets cataloged in webkit_gadgets_1402.js.
